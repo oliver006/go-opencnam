@@ -40,6 +40,10 @@ type ResponseData struct {
 	Uri    string
 }
 
+type Error struct {
+	Err string
+}
+
 func mustParseURL(host, path string) *url.URL {
 	r, err := url.Parse(host + path)
 	if err != nil {
@@ -99,10 +103,10 @@ func decodeResponse(ctx context.Context, r *http.Response) (interface{}, error) 
 		err = json.Unmarshal(b, &t)
 		return &t, err
 	default:
-		fmt.Printf("%d\n\n", r.StatusCode)
 		b, _ := ioutil.ReadAll(r.Body)
-		fmt.Println(string(b))
-		return nil, fmt.Errorf("unable to read response")
+		e := Error{}
+		json.Unmarshal(b, &e)
+		return nil, fmt.Errorf("%s", e.Err)
 	}
 }
 
